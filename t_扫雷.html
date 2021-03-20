@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="game_style.css"/>
+		<style type="text/css">
+			#remind{
+				
+				position: absolute;
+				left: 50px;
+				top: 30px;
+				color: rgb(89,69,0);
+				font-size: 20px;
+				font-weight: bolder;
+				cursor: pointer;
+			}
+			#reminds{
+				position: absolute;
+				top: 90px;
+				left: 45px;
+				width: 300px;
+				height: 450px;
+				border: 2px rgb(228,170,3) solid;
+				border-radius: 10px;
+				background-color: rgb(252,242,3);
+				
+			}
+		</style>
+	</head>
+	<body>
+			<div id="bgvideo">
+				<div id="welcome">
+					<h1 style="font-size: 50px;">欢迎来到扫雷游戏</h1>
+				</div>
+				
+				<div id="remind"  >
+					<p >帮助</p>
+				</div>
+				<div id="reminds">
+					<p>1.左键点击方块可翻开方块</p>
+					<p>2.方块后有炸弹和数字及空白三种情况:<br>
+						&nbsp;&nbsp;&nbsp;&nbsp;翻到炸弹后游戏即结束<br>
+						&nbsp;&nbsp;&nbsp;&nbsp;翻到数字说明以数字为中心的九宫格的炸弹数量即数字本身<br>
+						&nbsp;&nbsp;&nbsp;&nbsp;翻到空白说明以空白为中心的九宫格内没有炸弹
+						</p>
+					<p>3.右键点击为标记功能，有红旗确认炸弹和问号表示疑惑状态</p>
+					<p>4.可自定义行列数，但不能超过20</p>
+					<p>祝您游戏愉快</p>
+					<p>遇到任何问题均可以联系本人</p>
+					<p>邮箱地址：changqing97@aliyun.com</p>
+					<p>QQ：835312384</p>
+				</div>
+				
+				<video width="100%" height="" muted loop autoplay>
+					<source src="lib/backgroundvideo.mp4" type="video/mp4" ></source>
+					
+				</video>
+				<div id="game_struct">
+					<!-- 选择等级 -->
+					<form id="option">
+						<strong style="font-size: 20px;">行数/列数：</strong><input type="number" name="rows" id="rows" value="10" oninput="if(value>20)value=20;if(value<0)value=5" style="height: 20px; border: 2px solid black;border-radius: 3px; font-size: 18px; font-weight: bolder; "/>
+						<strong style="font-size: 20px;">炸弹数：</strong><input type="number" name="booms" id="booms" value="10"  style="height: 20px; border: 2px solid black;border-radius: 3px; font-size: 18px; font-weight: bolder; "/>
+						<input type="submit" value="确认" />
+					</form>
+					<!-- 游戏界面 -->
+					<table border="1px" cellspacing="0" cellpadding="0" align="center">
+						
+					</table>
+				</div>
+				
+				
+			</div>
+		
+		
+		
+		
+		<script src="lib/jquery-3.6.0.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			
+			
+			// 行数/列数
+			let rows = 0;
+			// 雷数
+			let booms = 0;
+			// 开始游戏时间
+			let startTime = null;
+			// 结束游戏时间
+			let stopTime = null;
+			// 游戏是否结束
+			let overFlag = false;
+			
+			// 表单提交
+			$('#option').submit(function() {
+				rows = $('#rows').val();
+				booms = $('#booms').val();
+				// 初始化游戏函数
+				init();
+				// 游戏没有结束
+				overFlag = false;
+				return false;
+			});
+			
+			
+			
+			
+			// 初始化游戏函数
+			function init() {
+				// 清空界面
+				$('table').empty();
+				// 生成界面
+				for (let i = 1; i <= rows; i++) {
+					let tr = $('<tr></tr>');
+					for (let j = 1; j <= rows; j++) {
+						tr.append('<td></td>');
+					}
+					$('table').append(tr);
+				}
+				// 随机生成雷
+				for (let i = 1; i <= booms; i++) {
+					let x = parseInt(Math.random() * rows);
+					let y = parseInt(Math.random() * rows);
+					if ($('tr').eq(x).children('td').eq(y).hasClass('boom')) {
+						i--;
+						continue;
+					}
+					$('tr').eq(x).children('td').eq(y).addClass('boom');
+					$('tr').eq(x).children('td').eq(y).text('B');
+				}
+				// 计算每一格的数字
+				for (let i = 0; i < rows; i++) {
+					for (let j = 0; j < rows; j++) {
+						let block = $('tr').eq(i).children('td').eq(j); 
+						// 如果是雷，跳过
+						if (block.hasClass('boom')) {
+							continue;
+						}
+						// 如果不是雷，则统计周围8个格的雷数
+						let count = 0;
+						let blocks = [];
+						blocks[0] = $('tr').eq(i-1<0?rows:i-1).children('td').eq(j-1<0?rows:j-1); 
+						blocks[1] = $('tr').eq(i-1<0?rows:i-1).children('td').eq(j); 
+						blocks[2] = $('tr').eq(i-1<0?rows:i-1).children('td').eq(j+1); 
+						blocks[3] = $('tr').eq(i).children('td').eq(j-1<0?rows:j-1); 
+						blocks[4] = $('tr').eq(i).children('td').eq(j+1); 
+						blocks[5] = $('tr').eq(i+1).children('td').eq(j-1<0?rows:j-1); 
+						blocks[6] = $('tr').eq(i+1).children('td').eq(j); 
+						blocks[7] = $('tr').eq(i+1).children('td').eq(j+1); 
+						for (let block of blocks) {
+							if (block.length > 0 && block.hasClass('boom')) {
+								count++;
+							}
+						}
+						block.text(count == 0 ? '' : count);
+					}
+				}
+			}
+			
+			// 初始自动提交表单
+			$('#option').submit();
+			
+			// td点击事件
+			$('table').on('mousedown', 'td', function(e) {
+				// 判断游戏是否结束
+				if (overFlag) {
+					return;
+				}
+				// 记录开始游戏时间
+				if (startTime == null) {
+					startTime = new Date();
+				}
+				if (e.button == 0) {
+					mouseLeftClick($(this));
+				} else {
+					mouseRightClick($(this));
+				}
+			})
+			
+			// 鼠标左键点击函数
+			function mouseLeftClick(block) {
+				// 移除旗帜和问号
+				block.removeClass('flag');
+				block.removeClass('may');
+				// 判断点击的是否是雷
+				if (block.hasClass('boom')) {
+					// 游戏失败
+					over();
+				} else {
+					// 翻开当前块
+					block.addClass('success');
+					
+					// 如果是空块，需要级联周围的块
+					if (block.text() == '') {
+						// 获取当前块的i和j
+						let i = block.parent().index();
+						let j = block.index();
+						
+						// 取出周围8个块
+						let blocks = [];
+						blocks[0] = $('tr').eq(i-1<0?rows:i-1).children('td').eq(j-1<0?rows:j-1);
+						blocks[1] = $('tr').eq(i-1<0?rows:i-1).children('td').eq(j); 
+						blocks[2] = $('tr').eq(i-1<0?rows:i-1).children('td').eq(j+1); 
+						blocks[3] = $('tr').eq(i).children('td').eq(j-1<0?rows:j-1); 
+						blocks[4] = $('tr').eq(i).children('td').eq(j+1); 
+						blocks[5] = $('tr').eq(i+1).children('td').eq(j-1<0?rows:j-1); 
+						blocks[6] = $('tr').eq(i+1).children('td').eq(j); 
+						blocks[7] = $('tr').eq(i+1).children('td').eq(j+1);  
+						 
+						// 如果是空块，执行左键点击
+						for (let block of blocks) {
+							if (block.length > 0 && block.text() == '' && !block.hasClass('success')) {
+								mouseLeftClick(block);
+							} else if (block.length > 0 && !block.hasClass('boom')) {
+								block.addClass('success');
+							}
+						}
+					}
+					
+					// 判断是否游戏胜利
+					if ($('.success').length == (rows * rows - booms)) {
+						// 游戏胜利
+						win();
+					}
+				}
+			}
+			
+			// 禁止右键菜单
+			document.oncontextmenu = function() {
+				return false;
+			}
+			
+			// 鼠标右键点击函数
+			function mouseRightClick(block) {
+				if (block.hasClass('flag')) {
+					block.removeClass('flag');
+					block.addClass('may');
+				} else if (block.hasClass('may')) {
+					block.removeClass('may');
+				} else {
+					block.addClass('flag');
+				}
+			}
+			
+			// 游戏胜利函数
+			function win() {
+				// 游戏结束状态
+				overFlag = true;
+				// 移除旗帜和问号
+				$('.flag').removeClass('flag');
+				$('.may').removeClass('may');
+				// 记录结束游戏时间
+				stopTime = new Date();
+				setTimeout(function() {
+					alert('游戏胜利！用时：' + (stopTime.getTime() - startTime.getTime()) / 1000 + '秒！');
+					$('.boom').addClass('error');
+				}, 0);
+			}
+			
+			// 游戏失败函数
+			function over() {
+				// 游戏结束状态
+				overFlag = true;
+				// 移除旗帜和问号
+				$('.flag').removeClass('flag');
+				$('.may').removeClass('may');
+				// 添加雷样式
+				$('.boom').addClass('error');
+				startTime == null;
+				setTimeout(function() {
+					alert('你太菜了！');
+				}, 0);
+			}
+			
+		</script>
+		
+	</body>
+</html>

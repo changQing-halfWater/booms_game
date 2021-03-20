@@ -1,0 +1,65 @@
+#option {
+				text-align: center;
+				margin: 30px auto;
+			}
+			#option input {
+				margin: 0 5px;
+			}
+			
+			td {
+				width: 30px;
+				height: 30px;
+				background-color: rgb(192, 192, 192);
+				cursor: pointer;
+				font-size: 20px;
+				font-weight: bolder;
+				text-align: center;
+				line-height: 30px;
+				color: rgba(0, 0, 0, 0);
+				border: 1px solid rgb(150, 150, 150);
+				box-shadow: white 0 0 10px;
+				transition: all 200ms;
+			}
+			
+			.success {
+				color: rgba(0, 0, 0, 1);
+				background-color: white;
+				box-shadow: none;
+			}
+			
+			.error {
+				background-color: red;
+				background-image: url(lib/炸弹.svg);
+				background-size: 80%;
+				background-position: center;
+				background-repeat: no-repeat;
+				box-shadow: none;
+			}
+			
+			.flag {
+				background-image: url(lib/flag.svg);
+				background-size: 80%;
+				background-position: center;
+				background-repeat: no-repeat;
+			}
+			
+			.may {
+				background-image: url(lib/问号.svg);
+				background-size: 80%;
+				background-position: center;
+				background-repeat: no-repeat;
+			}
+			#bgvideo{
+				position: relative;
+			}
+			#game_struct{
+				position: absolute;
+				left: 50%;
+				top: 155px;
+				margin-left: -350px;
+			}
+			#welcome{
+				position: absolute;
+				left: 40%;
+				top: 20px;
+			}
